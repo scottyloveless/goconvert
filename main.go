@@ -11,7 +11,6 @@ import (
 
 type appModel struct {
 	header           string
-	activeModel      tea.Model
 	activeFormula    formula
 	mostRecentResult result
 	previousResults  []result
@@ -34,7 +33,17 @@ func (m appModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m appModel) Update(tea.Msg) (tea.Model, tea.Cmd) {
+func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case switchToMainMenu:
+		m.activeModel = initialMainMenu()
+		return m, m.activeModel.Init()
+	case tea.KeyPressMsg:
+		switch msg.String() {
+		case "ctrl+c":
+			return m, tea.Quit
+		}
+	}
 	return m, nil
 }
 
