@@ -11,13 +11,17 @@ import (
 )
 
 type item struct {
-	num   int
-	title string
+	num     int
+	title   string
+	formula func(input float32) float32
+}
+
+func farenheitToCelcius(input float32) float32 {
+	return (input - 32) * (5 / 9)
 }
 
 type mainMenuModel struct {
-	Options  []item
-	TempMenu tempMenuModel
+	Options []item
 }
 
 func initialModel() mainMenuModel {
@@ -39,7 +43,7 @@ func (m mainMenuModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c":
 			return m, tea.Quit
 		case "1":
-			return initialTempModel(), nil // temp model goes here
+			return initialTempModel(), nil
 		}
 
 		return m, nil
@@ -63,7 +67,7 @@ type tempMenuModel struct {
 func initialTempModel() tea.Model {
 	return tempMenuModel{
 		Options: []item{
-			{num: 1, title: "Farenheit to Celcius"},
+			{num: 1, title: "Farenheit to Celcius", formula: farenheitToCelcius},
 		},
 	}
 }
@@ -101,9 +105,10 @@ func (m tempMenuModel) View() tea.View {
 type inputModel struct {
 	textarea textarea.Model
 	err      error
+	formula  func(input float32) float32
 }
 
-func initialInputModel() tea.Model {
+func initialInputModel(formula func(input float32) float32) tea.Model {
 	ta := textarea.New()
 	ta.Placeholder = "Enter number as float"
 	ta.SetStyles(textarea.DefaultStyles(true))
@@ -133,6 +138,9 @@ func (m inputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "esc":
 			return initialTempModel(), nil
+		case "enter":
+
+			return m.formula(m.textarea.Value())
 		default:
 			var cmd tea.Cmd
 			m.textarea, cmd = m.textarea.Update(msg)
