@@ -10,6 +10,7 @@ import (
 )
 
 type appModel struct {
+	activeModel      tea.Model
 	header           string
 	activeFormula    formula
 	mostRecentResult result
@@ -42,6 +43,8 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
+		case "1":
+			return m, func() tea.Msg { return switchToMainMenu{} }
 		}
 	}
 	return m, nil
